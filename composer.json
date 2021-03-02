@@ -1,0 +1,11 @@
+{
+	"autoload": {
+		"classmap": [
+			"./"
+		]
+	},
+
+    "require": {
+        "bramus/router": "~1.5"
+    }
+}
