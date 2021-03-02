@@ -12,4 +12,5 @@ Installation:
 Issues:
 -I tried to implement Logger as an interface but it faild because bramu/router doesn't allow passing constructor parameters when defining route controller.
 -I'm not sure I understood the CSMB school board method.
--Student model could use some refactoring.
+-Student model could use some refactoring. Especially queries.
+-I didn't get all the grades within the output.
