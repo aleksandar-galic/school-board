@@ -8,7 +8,7 @@ class Database
 	{
 		try
 		{
-			return new PDO(
+			return new \PDO(
 				$config['connection'] . ';dbname=' . $config['name'],
 				$config['username'],
 				$config['password'],
