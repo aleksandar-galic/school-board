@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Core\Database;
+use App\Logger\LogAsXML;
+use App\Logger\LogAsJSON;
 
 class Student
 {
@@ -11,7 +13,6 @@ class Student
 	public function __construct()
 	{
 		$config = require 'config.php';
-
 		$this->db = Database::get($config['database']);
 	}
 
@@ -55,7 +56,9 @@ class Student
 					$result['passed'] = true;
 				}
 
-				return json_encode($result, JSON_PRETTY_PRINT);
+				$logger = new LogAsJSON();
+
+				return $logger->render($result);
 
 				break;
 			case 2:
@@ -77,11 +80,14 @@ class Student
 					$result['passed'] = true;
 				}
 
-				return;
+				$logger = new LogAsXML();
 
-				default:
+				return $logger->render($result);
+
+				break;
+			default:
 				return;
-			break;
+				break;
 		}
 	}
 }
