@@ -20,6 +20,7 @@ create table school_board.grades
     id         int auto_increment
         primary key,
     student_id int not null,
+    subject     text not null,
     value      int not null,
     constraint grades_students_id_fk
         foreign key (student_id) references school_board.students (id)
@@ -35,22 +36,22 @@ values ('Katarina', 2);
 
 -- Populate grades table
 insert into grades (student_id, value)
-values (1, 8);
+values (1, 'languages', 8);
 insert into grades (student_id, value)
-values (1, 6);
+values (1, 'mathematics', 6);
 insert into grades (student_id, value)
-values (1, 7);
+values (1, 'programming', 7);
 insert into grades (student_id, value)
-values (1, 10);
+values (1, 'science', 10);
 
 insert into grades (student_id, value)
-values (2, 8);
+values (2, 'languages', 8);
 insert into grades (student_id, value)
-values (2, 10);
+values (2, 'languages', 10);
 insert into grades (student_id, value)
-values (2, 9);
+values (2, 'languages', 9);
 insert into grades (student_id, value)
-values (2, 6);
+values (2, 'languages', 6);
 
 -- Populate boards table
 
