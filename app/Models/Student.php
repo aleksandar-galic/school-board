@@ -12,8 +12,7 @@ class Student
 
 	public function __construct()
 	{
-		$config = require 'config.php';
-		$this->db = Database::get($config['database']);
+		$this->db = Database::connect()->get();
 	}
 
 	public function execute(string $query): array
