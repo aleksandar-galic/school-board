@@ -1,16 +1,20 @@
 # School Board Test
+To understand the goal of this project,
+read the test assigment - PDF file at the root of the project.
 
-Requirements:
-PHP
+##### Requirements:
+PHP >7.*
 MySQL
 
-Installation:
--run: composer install
--create a database and run sql file
--make a config file for database (see config.example.php)
+#### Installation:
+- Clone the repo:
+``` git clone https://github.com/aleksandar-galic/school-board.git && cd school-board/ ```
+- Run: ``` composer install ```
+- Connect to your local MySQL database, and run the sql script from the root of the project:
+``` source database.sql ```
+- Make a config file for database (see config.example.php)
+``` cp config.example.php config.php ```
+and populate data for connecting to MySQL
 
-Issues:
--I tried to implement Logger as an interface but it faild because bramu/router doesn't allow passing constructor parameters when defining route controller.
+## Issues:
 -I'm not sure I understood the CSMB school board method.
--Student model could use some refactoring. Especially queries.
--I didn't get all the grades within the output.
