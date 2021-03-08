@@ -16,78 +16,127 @@ class Student
 		$this->db = Database::get($config['database']);
 	}
 
-	public function find($id)
+	public function execute(string $query): array
 	{
-		$sql = "
-		select *
-		from students
-		where id={$id};
-		";
-
-		$statement = $this->db->prepare($sql);
+		$statement = $this->db->prepare($query);
 
 		$statement->execute();
 
 		$result = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
-		return $result[0];
+		return $result;
+	}
+
+	public function find($id): array
+	{
+		$sql = "
+			select *
+			from students
+			where id={$id};
+		";
+
+		return $this->execute($sql);
+	}
+
+	public function grades($id)
+	{
+		$sql = "
+			select subject, value from grades
+			where student_id = {$id}
+			order by (value) desc
+			limit 4;
+		";
+
+		return $this->execute($sql);
 	}
 
 
 	public function score($id)
 	{
-		switch ($this->find($id)['board_id']) {
+		// Find the student
+		$student = $this->find($id)[0];
+
+		// Get student's grades
+		$grades = $this->grades($id);
+
+		switch ($student['board_id']) {
 			case 1:
-				$sql = "
-				select students.id, students.name, avg(grades.value) as score
-				from grades
-				join students
-				on grades.student_id = students.id
-				where student_id = {$id};
-				";
+				// Add the grades to result
+				$student['grades'] = $grades;
 
-				$statement = $this->db->prepare($sql);
+				// Find the score
+				$score = $this->CSM($grades);
 
-				$statement->execute();
+				// Add the score to result
+				$student['score'] = $score;
 
-				$result = $statement->fetchAll(\PDO::FETCH_ASSOC)[0];
-
-				if ($result['score'] >= 7) {
-					$result['passed'] = true;
+				// Check if student passed and add to result
+				if ($score >= 7) {
+					$student['passed'] = true;
+				} else {
+					$student['passed'] = false;
 				}
 
+				// Final result doesn't need board
+				unset($student['board_id']);
+
+				// Return result
 				$logger = new LogAsJSON();
-
-				return $logger->render($result);
-
-				break;
+				return $logger->render($student);
 			case 2:
-				$sql = "
-				select students.id, students.name, max(grades.value) as score
-				from grades
-				join students
-				on grades.student_id = students.id
-				where student_id = {$id};
-				";
+				// Add the grades to result
+				$student['grades'] = $grades;
 
-				$statement = $this->db->prepare($sql);
+				// Find the score
+				$score = $this->CSMB($grades);
 
-				$statement->execute();
+				// Add the score to result
+				$student['score'] = $this->avg(array_column($grades, 'value'));
 
-				$result = $statement->fetchAll(\PDO::FETCH_ASSOC)[0];
+				// Get grades
+				$grades = $this->grades($id);
+				$student['grades'] = $grades;
 
-				if ($result['score'] >= 8) {
-					$result['passed'] = true;
+				// Check if student passed and add to result
+				if ($score >= 8) {
+					$student['passed'] = true;
+				} else {
+					$student['passed'] = false;
 				}
+
+				// Final result doesn't need board
+				unset($student['board_id']);
 
 				$logger = new LogAsXML();
-
-				return $logger->render($result);
-
-				break;
+				return $logger->render($student);
 			default:
-				return;
+				echo "Student not found";
 				break;
 		}
+	}
+
+	private function CSM($grades)
+	{
+		return $this->avg(array_column($grades, 'value'));
+	}
+
+	private function CSMB($grades)
+	{
+		$grades = array_column($grades, 'value');
+
+		if (count($grades) > 2) {
+			array_pop($grades);
+		}
+
+		return max($grades);
+	}
+
+	private function avg(array $array)
+	{
+		if (count($array)) {
+			return array_sum($array)/count($array);
+		}
+
+		return;
 	}
 }
