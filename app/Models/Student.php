@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Viewer;
 use Core\Database;
 use App\Logger\LogAsXML;
 use App\Logger\LogAsJSON;
@@ -37,7 +38,7 @@ class Student
 		return $this->execute($sql);
 	}
 
-	public function grades($id)
+	public function grades($id): array
 	{
 		$sql = "
 			select subject, value from grades
@@ -58,58 +59,44 @@ class Student
 		// Get student's grades
 		$grades = $this->grades($id);
 
+		// Add the grades to result
+		$student['grades'] = $grades;
+
+		// Find the score for each board, and if the student has passed.
+		// Add it to the result and return the result.
 		switch ($student['board_id']) {
 			case 1:
-				// Add the grades to result
-				$student['grades'] = $grades;
-
-				// Find the score
 				$score = $this->CSM($grades);
 
-				// Add the score to result
 				$student['score'] = $score;
 
-				// Check if student passed and add to result
 				if ($score >= 7) {
 					$student['passed'] = true;
 				} else {
 					$student['passed'] = false;
 				}
 
-				// Final result doesn't need board
 				unset($student['board_id']);
 
-				// Return result
-				$logger = new LogAsJSON();
-				return $logger->render($student);
+				$viewer = new Viewer(new LogAsJSON());
+				return $viewer->present($student);
 			case 2:
-				// Add the grades to result
-				$student['grades'] = $grades;
+				$result = $this->CSMB($grades);
 
-				// Find the score
-				$score = $this->CSMB($grades);
-
-				// Add the score to result
 				$student['score'] = $this->avg(array_column($grades, 'value'));
 
-				// Get grades
-				$grades = $this->grades($id);
-				$student['grades'] = $grades;
-
-				// Check if student passed and add to result
-				if ($score >= 8) {
+				if ($result >= 8) {
 					$student['passed'] = true;
 				} else {
 					$student['passed'] = false;
 				}
 
-				// Final result doesn't need board
 				unset($student['board_id']);
 
-				$logger = new LogAsXML();
-				return $logger->render($student);
+				$viewer = new Viewer(new LogAsXML());
+				return $viewer->present($student);
 			default:
-				echo "Student not found";
+				echo "School board not found";
 				break;
 		}
 	}
